@@ -31,7 +31,7 @@ class TelegramWebhook(BaseModel):
 
 
 def start(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Now you will have discounts!")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
 
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
