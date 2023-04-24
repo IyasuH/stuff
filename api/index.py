@@ -1,0 +1,63 @@
+import os
+from dotenv import load_dotenv
+
+import logging
+from typing import Optional
+from fastapi import FastAPI
+from pydantic import BaseModel
+from telegram import Update, Bot
+from telegram.ext import CommandHandler, MessageHandler, Updater, Filters, Dispatcher
+
+load_dotenv()
+
+# TOKEN = os.environ.get("TELE_TOKEN")
+TOKEN = os.getenv("TELE_TOKEN")
+
+app = FastAPI()
+
+class TelegramWebhook(BaseModel):
+    update_id: int
+    message: Optional[dict]
+    edited_message: Optional[dict]
+    channel_post: Optional[dict]
+    edited_channel_post: Optional[dict]
+    inline_query: Optional[dict]
+    chosen_inline_result: Optional[dict]
+    callback_query: Optional[dict]
+    shipping_query: Optional[dict]
+    pre_checkout_querry: Optional[dict]
+    poll: Optional[dict]
+    poll_answer: Optional[dict]
+
+
+def start(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Now you will have discounts!")
+
+def register_handlers(dispatcher):
+    # start_handler = CommandHandler('start', start)
+    dispatcher.add_handler(CommandHandler('start', start))
+
+@app.post("/webhook")
+def webhook(webhook_data: TelegramWebhook):
+    bot = Bot(token=TOKEN)
+    update = Update.de_json(webhook_data.__dict__, bot)
+    dispatcher = Dispatcher(bot, None, workers=4)
+    register_handlers(dispatcher)
+    dispatcher.process_update(update)
+    return {"msg":"ok"}
+
+@app.get("/")
+def index():
+    return {"msg":"okay"}
+
+def main():
+    updater = Updater(token=TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
+
+    register_handlers(dispatcher)
+
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == "__main__":
+    main()
