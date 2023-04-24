@@ -15,9 +15,10 @@ TOKEN = os.getenv("TELE_TOKEN")
 
 FIRST_MSG = """Hello {name}
 
-Welcome to Ready Coffee
+Welcome to <b>Coffee Go!</b>
 
 Congratulation!!
+
 Now you can get a discount using your discount number {discount_num}
 
 You can join our to follow up for more discounts
@@ -44,8 +45,8 @@ class TelegramWebhook(BaseModel):
 def start(update: Update, context: CallbackContext):
     user = update.effective_user or update.effective_chat
     name = getattr(user, "username", '')
-    discount_num = str(hash(name))[15:]
-    update.message.reply_text(FIRST_MSG.format(name=name,discount_num=discount_num))
+    discount_num = str(hash(name))[10:]
+    update.message.reply_text(text=FIRST_MSG.format(name=name,discount_num=discount_num), parse_mode="markdown")
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
 
 def register_handlers(dispatcher):
