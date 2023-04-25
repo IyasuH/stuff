@@ -135,7 +135,7 @@ def status_change(update: Update, context: CallbackContext):
         return
     # changing discount_use to True
     changes = {"discount_use":"True"}
-    customer_db.update(changes, userData[0]['id'])
+    customer_db.update(changes, str(userData[0]['id']))
     msg.reply_text(text=f'User named {userName} now used his discount')
     
 
