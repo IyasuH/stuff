@@ -137,6 +137,7 @@ def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('stat', stat))
     dispatcher.add_handler(CommandHandler('CoffeeGo', discount))
+    dispatcher.add_handler(CommandHandler('discounted', status_change))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
