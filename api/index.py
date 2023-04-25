@@ -128,7 +128,14 @@ def status_change(update: Update, context: CallbackContext):
     if effective_user.id not in ADMIN_IDs:
         msg.reply_text("You are not alloweded to use this command")
         return
-    userName  = str(context.args[0])
+    userName = str(context.args[0])
+    userData = customer_db.fetch({"username":userName}).items
+    if userData == []:
+        msg.reply_text(text=f"User named {userName} not found")
+        return
+    # changing discount_use to True
+    changes = {"discount_use":"True"}
+    customer_db.update(changes, userData[0]['id'])
     msg.reply_text(text=f'User named {userName} now used his discount')
     
 
