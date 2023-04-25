@@ -75,6 +75,7 @@ def start(update: Update, context: CallbackContext):
         # save to db
         # using put since insert uses more time
         customer_db.put(user_dict)
+    customer_query = customer_db.get(str(user.id))
     discount_num = customer_query['discount_num']
     update.message.reply_text(text=FIRST_MSG.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
