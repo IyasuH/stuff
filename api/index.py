@@ -35,8 +35,7 @@ app = FastAPI()
 
 deta = Deta(DETA_KEY)
 
-customer_db = deta.Base
-
+customer_db = deta.Base("Customer_DB")
 
 class TelegramWebhook(BaseModel):
     update_id: int
