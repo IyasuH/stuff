@@ -20,6 +20,15 @@ ADMIN_IDs = [403875924]
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(message)s", level=logging.INFO)
 
+DISCOUNT_USED = """
+Dear {name}
+
+You have alreday used you discount
+
+with discount number{discount_num}
+"""
+
+
 DISCOUNT_GRANTED_MSG = """
 <code>Congratulation!! </code> {name}
 
@@ -89,7 +98,10 @@ def discount(update: Update, context: CallbackContext):
         customer_db.put(user_dict)
     customer_query = customer_db.get(str(user.id))
     discount_num = customer_query['discount_num']
-    update.message.reply_text(text=DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
+    if customer_query['discount_use']=="False":
+        update.message.reply_text(text=DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
+    else:
+        update.message.reply_text(text=DISCOUNT_USED.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
 
 def stat(update: Update, context: CallbackContext):
@@ -116,6 +128,8 @@ def status_change(update: Update, context: CallbackContext):
     if effective_user.id not in ADMIN_IDs:
         msg.reply_text("You are not alloweded to use this command")
         return
+    userName  = str(context.args[0])
+    msg.reply_text(text=f'User named {userName} now used his discount')
     
 
 def register_handlers(dispatcher):
