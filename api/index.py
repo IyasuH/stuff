@@ -16,12 +16,13 @@ load_dotenv()
 # TOKEN = os.environ.get("TELE_TOKEN")
 TOKEN = os.getenv("TELE_TOKEN")
 DETA_KEY = os.getenv("DETA_KEY")
+ADMIN_IDs = [403875924]
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(message)s", level=logging.INFO)
 
 FIRST_MSG = """Hello {name}
 
-Welcome to <b>Coffee Go!</b>
+Welcome to <code>Coffee Go!</code>
 
 Congratulation!!
 
@@ -70,7 +71,7 @@ def start(update: Update, context: CallbackContext):
         # discount_use(if user used his/her discount or not) and default value is False
         user_dict['discount_use'] = 'False'
         # use id as key
-        user_dict['key'] = str(user.id)
+        user_dict['key '] = str(user.id)
 
         # save to db
         # using put since insert uses more time
@@ -80,9 +81,35 @@ def start(update: Update, context: CallbackContext):
     update.message.reply_text(text=FIRST_MSG.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
 
+def stat(update: Update, context: CallbackContext):
+    msg = update.message
+    effective_user = update.effective_user
+    if effective_user.id not in ADMIN_IDs:
+        msg.reply_text(text='You are not alloweded to use this command')
+        return
+    msg.reply_text(text="Sending users...")
+    # since customers number not expected to be greater than 1000 normal fetch function works fine I think
+    # cuatomer thoes who uses discounts
+    discount_use = customer_db.fetch({"discount_use": "True"}).items
+    # customer thoes who doesn't use their discount
+    discount_notUse = customer_db.fetch({"discount_use": "False"}).items
+    total=len(discount_use)+len(discount_notUse)
+    msg.reply_text(text=f'Total users: {total}\n Discount used: {discount_use}\n Discount not used: {discount_notUse}')
+
+def status_change(update: Update, context: CallbackContext):
+    # to update customer discount status
+    # not finished tho
+    msg = update.message
+    effective_user = update.effective_user
+    if effective_user.id not in ADMIN_IDs:
+        msg.reply_text("You are not alloweded to use this command")
+        return
+    
+
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
     dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler('stat', stat))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
