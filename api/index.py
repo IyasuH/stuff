@@ -20,15 +20,21 @@ ADMIN_IDs = [403875924]
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(message)s", level=logging.INFO)
 
-FIRST_MSG = """Hello {name}
-
-Welcome to <code>Coffee Go!</code>
-
-Congratulation!!
+DISCOUNT_GRANTED_MSG = """
+<code>Congratulation!! </code> {name}
 
 Now you can get a discount using your discount number {discount_num}
 
 You can join our to follow up for more discounts
+"""
+
+
+FIRST_MSG = """Hello {name}
+
+Welcome to <code>Coffee Go!</code>
+
+To get discount on our services send /CoffeeGo
+
 """
 
 
@@ -52,8 +58,13 @@ class TelegramWebhook(BaseModel):
     poll: Optional[dict]
     poll_answer: Optional[dict]
 
-
 def start(update: Update, context: CallbackContext):
+    user = update.effective_user or update.effective_chat
+
+    first_name = getattr(user, "first_name", '')
+    update.message.reply_text(text=FIRST_MSG.format(name=first_name), parse_mode=telegram.ParseMode.HTML)
+
+def discount(update: Update, context: CallbackContext):
     user = update.effective_user or update.effective_chat
 
     user_name = getattr(user, "username", '')
@@ -78,10 +89,11 @@ def start(update: Update, context: CallbackContext):
         customer_db.put(user_dict)
     customer_query = customer_db.get(str(user.id))
     discount_num = customer_query['discount_num']
-    update.message.reply_text(text=FIRST_MSG.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
+    update.message.reply_text(text=DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
 
 def stat(update: Update, context: CallbackContext):
+    # to get genral status
     msg = update.message
     effective_user = update.effective_user
     if effective_user.id not in ADMIN_IDs:
@@ -94,7 +106,7 @@ def stat(update: Update, context: CallbackContext):
     # customer thoes who doesn't use their discount
     discount_notUse = customer_db.fetch({"discount_use": "False"}).items
     total=len(discount_use)+len(discount_notUse)
-    msg.reply_text(text=f'Total users: {total}\n Discount used: {discount_use}\n Discount not used: {discount_notUse}')
+    msg.reply_text(text=f'Total users: {total}\n Discount used: {len(discount_use)}\n Discount not used: {len(discount_notUse)}')
 
 def status_change(update: Update, context: CallbackContext):
     # to update customer discount status
@@ -110,6 +122,7 @@ def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('stat', stat))
+    dispatcher.add_handler(CommandHandler('CoffeeGo', discount))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
