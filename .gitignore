@@ -1,2 +1,4 @@
 env
 .env
+.space
+test.py
