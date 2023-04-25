@@ -25,7 +25,9 @@ Dear {name}
 
 You have alreday used you discount
 
-with discount number{discount_num}
+with discount number {discount_num}
+
+we will let you know when their is other discounts
 """
 
 
