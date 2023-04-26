@@ -106,7 +106,8 @@ def discount(update: Update, context: CallbackContext):
         user_dict['discount_num'] = discount_num
         # discount_use(if user used his/her discount or not) and default value is False
         user_dict['discount_use'] = 'False'
-        user_dict['joined_at'] = datetime.datetime.now()
+        todayNow = datetime.datetime.now()
+        user_dict['joined_at'] = todayNow.strftime("%d/%m/%y, %H:%M")
         # use id as key
         user_dict['key'] = str(user.id)
 
@@ -168,7 +169,7 @@ def menu(update: Update, context: CallbackContext):
     relaseDateTime = datetime.datetime(2023, 4, 30)
     # time difference
     timeDiff = relaseDateTime - datetime.datetime.now()
-    if timeDiff<0:
+    if timeDiff.days<0:
         # timer ends
         # for the first time menu should be send automatically
         msg.reply_text(text="Timer is done here are the products menu")
