@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import time
 
 import logging
 
@@ -98,6 +99,8 @@ def discount(update: Update, context: CallbackContext):
         # save to db
         # using put since insert uses more time
         customer_db.put(user_dict)
+        # sleep time
+        time.sleep(.5)
     customer_query = customer_db.get(str(user.id))
     discount_num = customer_query['discount_num']
     if customer_query['discount_use']=="False":
