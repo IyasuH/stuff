@@ -38,7 +38,9 @@ DISCOUNT_GRANTED_MSG = """
 Now you can get a discount using your discount number {discount_num}
 
 When you apply this discount number on Wednsday May 3rd you get 50% off
+
 When you apply this discount number on Thursday May 4th you get 25% off
+
 When you apply this discount number on Friday May 5th you get 10% off
 """
 
@@ -50,6 +52,12 @@ Welcome to <code>Coffee Go!</code>
 To get discount on our services send /CoffeeGo
 
 To get the products menu /menu
+"""
+
+CONTACT_MSG = """
+You can contact as using
+
+@IyasuHa
 """
 
 
@@ -153,6 +161,10 @@ def menu(update: Update, context: CallbackContext):
     msg = update.message
     msg.reply_text(text="<strong>The menu will be avaialble on Sunday Apr 30 at 9AM</strong>", parse_mode=telegram.ParseMode.HTML)
 
+def contacts(update: Update, context: CallbackContext):
+    msg = update.message
+    msg.reply_text(text=CONTACT_MSG, parse_mode=telegram.ParseMode.HTML)
+
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
     dispatcher.add_handler(CommandHandler('start', start))
@@ -160,6 +172,7 @@ def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('CoffeeGo', discount))
     dispatcher.add_handler(CommandHandler('discounted', status_change))
     dispatcher.add_handler(CommandHandler('menu', menu))
+    dispatcher.add_handler(CommandHandler('contacts', contacts))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
