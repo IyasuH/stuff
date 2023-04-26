@@ -142,7 +142,13 @@ def status_change(update: Update, context: CallbackContext):
     changes = {"discount_use":"True"}
     customer_db.update(changes, str(userData[0]['id']))
     msg.reply_text(text=f'User named {userName} now used his discount')
-    
+
+def menu(update: Update, context: CallbackContext):
+    # send customers menu when menu is available
+    # set time for monday
+    # and automate msg send when the timer complete
+    msg = update.message
+    msg.reply_text(text="<strong>The menu will be avaialble at Sunday Apr 30 at 9AM</strong>", parse_mode=telegram.ParseMode.HTML)
 
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
@@ -150,6 +156,7 @@ def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('stat', stat))
     dispatcher.add_handler(CommandHandler('CoffeeGo', discount))
     dispatcher.add_handler(CommandHandler('discounted', status_change))
+    dispatcher.add_handler(CommandHandler('menu', menu))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
