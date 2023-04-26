@@ -37,7 +37,9 @@ DISCOUNT_GRANTED_MSG = """
 
 Now you can get a discount using your discount number {discount_num}
 
-You can join our to follow up for more discounts
+When you apply this discount number on May 3rd you get 50% off
+When you apply this discount number on May 4th you get 25% off
+When you apply this discount number on May 5th you get 10% off
 """
 
 
