@@ -73,7 +73,7 @@ menu_db = deta.Base("Menu_DB")
 
 # here i avoided the 9Am thing and just make it when it will be APR 30
 # Sunday Apr 30 I think the server time behinde 3hrs
-relaseDateTime = datetime.datetime(2023, 4, 26, 22, 24)
+relaseDateTime = datetime.datetime(2023, 4, 26, 22, 39)
 
 
 class TelegramWebhook(BaseModel):
@@ -147,10 +147,12 @@ def discount(update: Update, context: CallbackContext):
     # query all users(who doesn't use their discount) and send them the scheduled msg
     customers = customer_db.fetch({"discount_use": "False"}).items
     for customer in customers:
-        try:
-            context.job_queue.run_once(menuReleased, due, chat_id=customer['chat_id'], name=str(customer['chat_id']), data=due)
-        except:
-            pass
+        chat_id = customer['chat_id']
+        context.job_queue.run_once(menuReleased, due, chat_id=chat_id, name=str(chat_id), data=due)
+        # try:
+        #     context.job_queue.run_once(menuReleased, due, chat_id=customer['chat_id'], name=str(customer['chat_id']), data=due)
+        # except:
+        #     pass
     
 
 def stat(update: Update, context: CallbackContext):
