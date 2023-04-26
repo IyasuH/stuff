@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import time
+import datetime
 
 import logging
 
@@ -45,7 +46,7 @@ When you apply this discount number on Friday May 5th you get 10% off
 """
 
 
-FIRST_MSG = """Hello {name}
+FIRST_MSG = """Hello 👋 <a href="tg://user?id={user_id}">{name}</a>
 
 Welcome to <code>Coffee Go!</code>
 
@@ -66,6 +67,7 @@ app = FastAPI()
 deta = Deta(DETA_KEY)
 
 customer_db = deta.Base("Customer_DB")
+menu_db = deta.Base("Menu_DB")
 
 class TelegramWebhook(BaseModel):
     update_id: int
@@ -85,7 +87,7 @@ def start(update: Update, context: CallbackContext):
     user = update.effective_user or update.effective_chat
 
     first_name = getattr(user, "first_name", '')
-    update.message.reply_text(text=FIRST_MSG.format(name=first_name), parse_mode=telegram.ParseMode.HTML)
+    update.message.reply_html(text=FIRST_MSG.format(name=first_name, user_id=user.id))
 
 def discount(update: Update, context: CallbackContext):
     user = update.effective_user or update.effective_chat
@@ -104,6 +106,7 @@ def discount(update: Update, context: CallbackContext):
         user_dict['discount_num'] = discount_num
         # discount_use(if user used his/her discount or not) and default value is False
         user_dict['discount_use'] = 'False'
+        user_dict['joined_at'] = datetime.datetime.now()
         # use id as key
         user_dict['key'] = str(user.id)
 
@@ -154,12 +157,28 @@ def status_change(update: Update, context: CallbackContext):
     customer_db.update(changes, str(userData[0]['id']))
     msg.reply_text(text=f'User named {userName} now used his discount')
 
+def count_down(td):
+    # recives time delat and return day, hour, minute format
+    return f"{td.days} : Days, {td.seconds//3600} : Hours And {(td.seconds//60)%60} : Minutes"
+
 def menu(update: Update, context: CallbackContext):
-    # send customers menu when menu is available
-    # set time for monday
     # and automate msg send when the timer complete
     msg = update.message
-    msg.reply_text(text="<strong>The menu will be avaialble on Sunday Apr 30 at 9AM</strong>", parse_mode=telegram.ParseMode.HTML)
+    # here i avoided the 9Am thing and just make it when it will be APR 30
+    relaseDateTime = datetime.datetime(2023, 4, 30)
+    # time difference
+    timeDiff = relaseDateTime - datetime.datetime.now()
+    if timeDiff<0:
+        # timer ends
+        # for the first time menu should be send automatically
+        msg.reply_text(text="Timer is done here are the products menu")
+    else:
+        count_down_value = count_down(timeDiff)
+        msg.reply_text(text="""
+        <strong>The menu will be avaialble on Sunday Apr 30</strong>
+
+        After <code>{count_down_value}</code>
+        """, parse_mode=telegram.ParseMode.HTML)
 
 def contacts(update: Update, context: CallbackContext):
     msg = update.message
