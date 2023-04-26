@@ -94,7 +94,7 @@ def discount(update: Update, context: CallbackContext):
         # discount_use(if user used his/her discount or not) and default value is False
         user_dict['discount_use'] = 'False'
         # use id as key
-        user_dict['key '] = str(user.id)
+        user_dict['key'] = str(user.id)
 
         # save to db
         # using put since insert uses more time
