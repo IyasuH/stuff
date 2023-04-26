@@ -38,11 +38,13 @@ DISCOUNT_GRANTED_MSG = """
 
 Now you can get a discount using your discount number {discount_num}
 
-When you apply this discount number on Wednsday May 3rd you get 50% off
+When you apply this discount number on 
 
-When you apply this discount number on Thursday May 4th you get 25% off
+    Wednsday May 3rd you get 50% off
 
-When you apply this discount number on Friday May 5th you get 10% off
+    Thursday May 4th you get 25% off
+
+    Friday May 5th you get 10% off
 """
 
 
@@ -69,6 +71,11 @@ deta = Deta(DETA_KEY)
 customer_db = deta.Base("Customer_DB")
 menu_db = deta.Base("Menu_DB")
 
+# here i avoided the 9Am thing and just make it when it will be APR 30
+# Sunday Apr 30
+relaseDateTime = datetime.datetime(2023, 4, 27, 0, 59)
+
+
 class TelegramWebhook(BaseModel):
     update_id: int
     message: Optional[dict]
@@ -89,6 +96,9 @@ def start(update: Update, context: CallbackContext):
     first_name = getattr(user, "first_name", '')
     update.message.reply_html(text=FIRST_MSG.format(name=first_name, user_id=user.id))
 
+def menuReleased(context:CallbackContext):
+    context.bot.send_message(context.job.chat_id, text=f"Today is Sunday, And here is your menu")
+
 def discount(update: Update, context: CallbackContext):
     user = update.effective_user or update.effective_chat
 
@@ -108,6 +118,9 @@ def discount(update: Update, context: CallbackContext):
         user_dict['discount_use'] = 'False'
         todayNow = datetime.datetime.now()
         user_dict['joined_at'] = todayNow.strftime("%d/%m/%y, %H:%M")
+
+        # also save chat_id for schedule msgs
+        user_dict['chat_id'] = update.effective_message.chat_id
         # use id as key
         user_dict['key'] = str(user.id)
 
@@ -123,6 +136,22 @@ def discount(update: Update, context: CallbackContext):
     else:
         update.message.reply_text(text=DISCOUNT_USED.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
+
+    # here to send menu due Sunday Apr 30
+    timeDiff = relaseDateTime - datetime.datetime.now()
+    # total due seconds
+    due = timeDiff.days*24*3600+timeDiff.seconds
+    if due<0:
+        return
+
+    # query all users(who doesn't use their discount) and send them the scheduled msg
+    customers = customer_db.fetch({"discount_use": "False"}).items
+    for customer in customers:
+        try:
+            context.job_queue.run_once(menuReleased, due, chat_id=customer['chat_id'], name=str(customer['chat_id']), data=due)
+        except:
+            pass
+    
 
 def stat(update: Update, context: CallbackContext):
     # to get genral status
@@ -165,8 +194,6 @@ def count_down(td):
 def menu(update: Update, context: CallbackContext):
     # and automate msg send when the timer complete
     msg = update.message
-    # here i avoided the 9Am thing and just make it when it will be APR 30
-    relaseDateTime = datetime.datetime(2023, 4, 30)
     # time difference
     timeDiff = relaseDateTime - datetime.datetime.now()
     if timeDiff.days<0:
@@ -175,7 +202,7 @@ def menu(update: Update, context: CallbackContext):
         msg.reply_text(text="Timer is done here are the products menu")
     else:
         count_down_value = count_down(timeDiff)
-        msg.reply_text(text="""
+        msg.reply_text(text=f"""
         <strong>The menu will be avaialble on Sunday Apr 30</strong>
 
         After <code>{count_down_value}</code>
