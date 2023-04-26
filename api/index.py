@@ -47,6 +47,7 @@ Welcome to <code>Coffee Go!</code>
 
 To get discount on our services send /CoffeeGo
 
+To get the products menu /menu
 """
 
 
