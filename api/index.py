@@ -37,9 +37,9 @@ DISCOUNT_GRANTED_MSG = """
 
 Now you can get a discount using your discount number {discount_num}
 
-When you apply this discount number on May 3rd you get 50% off
-When you apply this discount number on May 4th you get 25% off
-When you apply this discount number on May 5th you get 10% off
+When you apply this discount number on Wednsday May 3rd you get 50% off
+When you apply this discount number on Thursday May 4th you get 25% off
+When you apply this discount number on Friday May 5th you get 10% off
 """
 
 
@@ -151,7 +151,7 @@ def menu(update: Update, context: CallbackContext):
     # set time for monday
     # and automate msg send when the timer complete
     msg = update.message
-    msg.reply_text(text="<strong>The menu will be avaialble at Sunday Apr 30 at 9AM</strong>", parse_mode=telegram.ParseMode.HTML)
+    msg.reply_text(text="<strong>The menu will be avaialble on Sunday Apr 30 at 9AM</strong>", parse_mode=telegram.ParseMode.HTML)
 
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
