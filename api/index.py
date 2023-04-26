@@ -73,7 +73,7 @@ menu_db = deta.Base("Menu_DB")
 
 # here i avoided the 9Am thing and just make it when it will be APR 30
 # Sunday Apr 30 I think the server time behinde 3hrs
-relaseDateTime = datetime.datetime(2023, 4, 26, 22, 15)
+relaseDateTime = datetime.datetime(2023, 4, 26, 22, 19)
 
 
 class TelegramWebhook(BaseModel):
