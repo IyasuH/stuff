@@ -100,7 +100,7 @@ def discount(update: Update, context: CallbackContext):
         # using put since insert uses more time
         customer_db.put(user_dict)
         # sleep time
-        time.sleep(.5)
+        time.sleep(2)
     customer_query = customer_db.get(str(user.id))
     discount_num = customer_query['discount_num']
     if customer_query['discount_use']=="False":
