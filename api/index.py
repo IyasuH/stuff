@@ -29,7 +29,7 @@ You have alreday used you discount
 
 with discount number {discount_num}
 
-we will let you know when their is other discounts
+we will let you know when their is another discounts
 """
 
 
@@ -73,7 +73,7 @@ menu_db = deta.Base("Menu_DB")
 
 # here i avoided the 9Am thing and just make it when it will be APR 30
 # Sunday Apr 30 I think the server time behinde 3hrs
-relaseDateTime = datetime.datetime(2023, 4, 26, 22, 39)
+relaseDateTime = datetime.datetime(2023, 4, 30)
 
 
 class TelegramWebhook(BaseModel):
@@ -96,8 +96,8 @@ def start(update: Update, context: CallbackContext):
     first_name = getattr(user, "first_name", '')
     update.message.reply_html(text=FIRST_MSG.format(name=first_name, user_id=user.id))
 
-def menuReleased(context:CallbackContext):
-    context.bot.send_message(context.job.chat_id, text=f"Today is Sunday, And here is your menu")
+# def menuReleased(context:CallbackContext):
+#     context.bot.send_message(context.job.chat_id, text=f"Today is Sunday, And here is your menu")
 
 def discount(update: Update, context: CallbackContext):
     user = update.effective_user or update.effective_chat
@@ -136,23 +136,23 @@ def discount(update: Update, context: CallbackContext):
     else:
         update.message.reply_text(text=DISCOUNT_USED.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
-
+    # using corns
     # here to send menu due Sunday Apr 30
-    timeDiff = relaseDateTime - datetime.datetime.now()
-    # total due seconds
-    due = timeDiff.days*24*3600+timeDiff.seconds
-    if due<0:
-        return
+    # timeDiff = relaseDateTime - datetime.datetime.now()
+    # # total due seconds
+    # due = timeDiff.days*24*3600+timeDiff.seconds
+    # if due<0:
+    #     return
 
-    # query all users(who doesn't use their discount) and send them the scheduled msg
-    customers = customer_db.fetch({"discount_use": "False"}).items
-    for customer in customers:
-        chat_id = customer['chat_id']
-        context.job_queue.run_once(menuReleased, due, chat_id=chat_id, name=str(chat_id), data=due)
-        # try:
-        #     context.job_queue.run_once(menuReleased, due, chat_id=customer['chat_id'], name=str(customer['chat_id']), data=due)
-        # except:
-        #     pass
+    # # query all users(who doesn't use their discount) and send them the scheduled msg
+    # customers = customer_db.fetch({"discount_use": "False"}).items
+    # for customer in customers:
+    #     chat_id = customer['chat_id']
+    #     updater.job_queue.run_once(menuReleased, due, chat_id=chat_id, name=str(chat_id), data=due)
+    #     # try:
+    #     #     context.job_queue.run_once(menuReleased, due, chat_id=customer['chat_id'], name=str(customer['chat_id']), data=due)
+    #     # except:
+    #     #     pass
     
 
 def stat(update: Update, context: CallbackContext):
@@ -191,7 +191,7 @@ def status_change(update: Update, context: CallbackContext):
 
 def count_down(td):
     # recives time delat and return day, hour, minute format
-    return f"{td.days} : Days, {td.seconds//3600} : Hours And {(td.seconds//60)%60} : Minutes"
+    return f"  {td.days}:Days, {td.seconds//3600}:Hours And {(td.seconds//60)%60}:Minutes"
 
 def menu(update: Update, context: CallbackContext):
     # and automate msg send when the timer complete
