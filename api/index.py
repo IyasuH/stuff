@@ -96,9 +96,6 @@ def start(update: Update, context: CallbackContext):
     first_name = getattr(user, "first_name", '')
     update.message.reply_html(text=FIRST_MSG.format(name=first_name, user_id=user.id))
 
-# def menuReleased(context:CallbackContext):
-#     context.bot.send_message(context.job.chat_id, text=f"Today is Sunday, And here is your menu")
-
 def discount(update: Update, context: CallbackContext):
     user = update.effective_user or update.effective_chat
 
@@ -120,7 +117,6 @@ def discount(update: Update, context: CallbackContext):
         user_dict['joined_at'] = todayNow.strftime("%d/%m/%y, %H:%M")
 
         # also save chat_id for schedule msgs
-        user_dict['chat_id'] = update.effective_message.chat_id
         # use id as key
         user_dict['key'] = str(user.id)
 
@@ -128,13 +124,13 @@ def discount(update: Update, context: CallbackContext):
         # using put since insert uses more time
         customer_db.put(user_dict)
         # sleep time
-        time.sleep(2)
+        time.sleep(.5)
     customer_query = customer_db.get(str(user.id))
     discount_num = customer_query['discount_num']
     if customer_query['discount_use']=="False":
-        update.message.reply_text(text=DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
+        update.message.reply_html(DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num))
     else:
-        update.message.reply_text(text=DISCOUNT_USED.format(name=first_name,discount_num=discount_num), parse_mode=telegram.ParseMode.HTML)
+        update.message.reply_html(DISCOUNT_USED.format(name=first_name,discount_num=discount_num))
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
     # using corns
     # here to send menu due Sunday Apr 30
@@ -153,7 +149,38 @@ def discount(update: Update, context: CallbackContext):
     #     #     context.job_queue.run_once(menuReleased, due, chat_id=customer['chat_id'], name=str(customer['chat_id']), data=due)
     #     # except:
     #     #     pass
-    
+
+# cron job
+@app.get('/api/cron')
+def menuReleased():
+    # customers only who don't use their discount
+    customers = customer_db.fetch({"discount_use": "False"}).items
+    all_customers = customers.items
+    while customers.last:
+        customers = customer_db.fetch(last=customers.last)
+        all_customers += customers.items
+
+    # just hope menu items will not be geater than 1000
+    menus = menu_db.fetch().items
+
+    bot = Bot(TOKEN)
+    count = 0
+
+    menuMsg = "The menus are " + str(menus)
+    for customer in all_customers:
+        try:
+            bot.send_message(
+                chat_id=int(customer['key']),
+                text = menuMsg
+            )
+            count += 1
+            if count == 20:
+                time.sleep(1)
+                count = 0
+        except:
+            pass
+
+    return {"msg": "ok"}
 
 def stat(update: Update, context: CallbackContext):
     # to get genral status
@@ -162,12 +189,35 @@ def stat(update: Update, context: CallbackContext):
     if effective_user.id not in ADMIN_IDs:
         msg.reply_text(text='You are not alloweded to use this command')
         return
-    msg.reply_text(text="Sending users...")
+    
+    # MAKE THIS IN WRAPER
+    # msg.reply_text(text="Sending users...")
+    # user = update.effective_chat or update.effective_user or update.message.from_user
+    # msg=context.bot.send_message(
+    #     chat_id=user.id,
+    #     text="Please wait..."
+    # )
+    customers = customer_db.fetch().items
+    all_customers = customers.items
+    while customers.last:
+        customers = customer_db.fetch(last=customers.last)
+        all_customers += customers.items
+        
+    discount_use = []
+    discount_notUse = []
+
+    for customer in all_customers:
+        if customer['discount_use'] == 'False':
+            discount_notUse.append(customer)
+        else:
+            discount_use.append(customer)
+
     # since customers number not expected to be greater than 1000 normal fetch function works fine I think
-    # cuatomer thoes who uses discounts
-    discount_use = customer_db.fetch({"discount_use": "True"}).items
+    # customer thoes who uses discounts
+    # discount_use = customer_db.fetch({"discount_use": "True"}).items
     # customer thoes who doesn't use their discount
-    discount_notUse = customer_db.fetch({"discount_use": "False"}).items
+    # discount_notUse = customer_db.fetch({"discount_use": "False"}).items
+
     total=len(discount_use)+len(discount_notUse)
     msg.reply_text(text=f'Total users: {total}\n Discount used: {len(discount_use)}\n Discount not used: {len(discount_notUse)}')
 
@@ -214,6 +264,18 @@ def contacts(update: Update, context: CallbackContext):
     msg = update.message
     msg.reply_text(text=CONTACT_MSG, parse_mode=telegram.ParseMode.HTML)
 
+def add_menu(update: Update, context: CallbackContext):
+    # this menu is just for the customers to see it
+    effective_user = update.effective_user
+    if effective_user.id not in ADMIN_IDs:
+        update.message.reply_text(text='You are not alloweded to use this command')
+        return
+    menu_dict = {
+        "item_name":"Chocolate Mocha", "price":40, "desc":"Chocolate moca is one of our product"
+        }
+    menu_db.put(menu_dict)
+    update.message.reply_text("Initiated...")
+
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
     dispatcher.add_handler(CommandHandler('start', start))
@@ -222,6 +284,7 @@ def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('discounted', status_change))
     dispatcher.add_handler(CommandHandler('menu', menu))
     dispatcher.add_handler(CommandHandler('contacts', contacts))
+    dispatcher.add_menu(CommandHandler('adddmenus', add_menu))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
