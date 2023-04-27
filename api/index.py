@@ -154,7 +154,7 @@ def discount(update: Update, context: CallbackContext):
 @app.get('/api/cron')
 def menuReleased():
     # customers only who don't use their discount
-    customers = customer_db.fetch({"discount_use": "False"}).items
+    customers = customer_db.fetch({"discount_use": "False"})
     all_customers = customers.items
     while customers.last:
         customers = customer_db.fetch(last=customers.last)
@@ -197,7 +197,7 @@ def stat(update: Update, context: CallbackContext):
     #     chat_id=user.id,
     #     text="Please wait..."
     # )
-    customers = customer_db.fetch().items
+    customers = customer_db.fetch()
     all_customers = customers.items
     while customers.last:
         customers = customer_db.fetch(last=customers.last)
