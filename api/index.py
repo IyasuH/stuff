@@ -275,19 +275,29 @@ def add_menu(update: Update, context: CallbackContext):
         update.message.reply_text(text='You are not alloweded to use this command')
         return
     menu_dict = {
-        "item_name":"Chocolate Mocha", "price":40, "desc":"Chocolate moca is one of our product"
+        "item_name":"Chocolate Mocha", "price":40, "desc":"Chocolate moca is one of our products"
         }
     menu_db.put(menu_dict)
-    update.message.reply_text("Initiated...")
+    update.message.reply_text(text="Initiated...")
+
+def show_menu(update: Update, context: CallbackContext):
+    effective_user = update.effective_user
+    if effective_user.id not in ADMIN_IDs:
+        update.message.reply_text(text='You are not alloweded to use this command')
+        return
+    menus = menu_db.fetch().items
+    update.message.reply_text("Menus: "+str(menus))
 
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
-    dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CommandHandler('stat', stat))
+    dispatcher.add_handler(CommandHandler('start', start))    
     dispatcher.add_handler(CommandHandler('CoffeeGo', discount))
-    dispatcher.add_handler(CommandHandler('discounted', status_change))
     dispatcher.add_handler(CommandHandler('menu', menu))
     dispatcher.add_handler(CommandHandler('contacts', contacts))
+
+    dispatcher.add_handler(CommandHandler('discounted', status_change))
+    dispatcher.add_handler(CommandHandler('stat', stat))
+    dispatcher.add_handler(CommandHandler('showMenu', show_menu))
     dispatcher.add_handler(CommandHandler('adddmenus', add_menu))
 
 def main():
