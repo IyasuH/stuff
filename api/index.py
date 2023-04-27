@@ -61,6 +61,9 @@ CONTACT_MSG = """
 You can contact as using
 
 @IyasuHa
+
+@Dagalex
+
 """
 
 
