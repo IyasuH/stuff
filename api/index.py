@@ -219,7 +219,11 @@ def stat(update: Update, context: CallbackContext):
     # discount_notUse = customer_db.fetch({"discount_use": "False"}).items
 
     total=len(discount_use)+len(discount_notUse)
-    msg.reply_text(text=f'Total users: {total}\n Discount used: {len(discount_use)}\n Discount not used: {len(discount_notUse)}')
+    msg.reply_text(text=f"""
+    Total users: {len(all_customers)}
+    Discount used: {len(discount_use)}
+    Discount not used: {len(discount_notUse)}
+    """)
 
 def status_change(update: Update, context: CallbackContext):
     # to update customer discount status
@@ -284,7 +288,7 @@ def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('discounted', status_change))
     dispatcher.add_handler(CommandHandler('menu', menu))
     dispatcher.add_handler(CommandHandler('contacts', contacts))
-    dispatcher.add_menu(CommandHandler('adddmenus', add_menu))
+    dispatcher.add_handler(CommandHandler('adddmenus', add_menu))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
