@@ -297,9 +297,11 @@ def show_menu(update: Update, context: CallbackContext):
         # menutxt="""
         # {menu["item_name"]}
         # """
-        menuTxtAdd+="\n"+str(count)+". \n"+"\tName: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +"\n"+"\tBig Cup: "+str(menu["small_cup_price"])+"\n"
+        menuTxtAdd+="\n"+str(count)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +" birr\n"+"\tBig Cup: "+str(menu["big_cup_price"])+" birr\n"
         count+=1
     update.message.reply_text("Menus: "+menuTxtAdd)
+    for menu in menus:
+        update.messge.reply_text(menu["item_name"]+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
 
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
