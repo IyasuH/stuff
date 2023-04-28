@@ -213,13 +213,13 @@ def start_stat(update: Update, context: CallbackContext):
         msg.reply_text(text='You are not alloweded to use this command')
         return
     # here customers that only send start
-    customers = customer_db.fetch()
-    all_customers = customers.items
-    while customers.last:
-        customers = customer_db.fetch(last=customers.last)
-        all_customers += customers.items    
+    s_customers = susers_db.fetch()
+    all_s_customers = s_customers.items
+    while s_customers.last:
+        s_customers = susers_db.fetch(last=s_customers.last)
+        all_s_customers += s_customers.items
     msg.reply_text(text=f"""
-    Total users: {len(all_customers)}
+    Total users: {len(all_s_customers)}
     """)
 
 def stat(update: Update, context: CallbackContext):
