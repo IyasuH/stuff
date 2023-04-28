@@ -297,7 +297,7 @@ def show_menu(update: Update, context: CallbackContext):
         # menutxt="""
         # {menu["item_name"]}
         # """
-        menuTxtAdd+="\n"+count+". \n"+"\tName: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +"\n"+"\tBig Cup: "+str(menu["small_cup_price"])+"\n"
+        menuTxtAdd+="\n"+str(count)+". \n"+"\tName: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +"\n"+"\tBig Cup: "+str(menu["small_cup_price"])+"\n"
         count+=1
     update.message.reply_text("Menus: "+menuTxtAdd)
 
