@@ -76,7 +76,7 @@ menu_db = deta.Base("Menu_DB")
 
 # here i avoided the 9Am thing and just make it when it will be APR 30
 # Sunday Apr 30 I think the server time behinde 3hrs
-relaseDateTime = datetime.datetime(2023, 4, 30)
+relaseDateTime = datetime.datetime(2023, 5, 2)
 
 
 class TelegramWebhook(BaseModel):
@@ -248,7 +248,7 @@ def status_change(update: Update, context: CallbackContext):
 
 def count_down(td):
     # recives time delat and return day, hour, minute format
-    return f"  {td.days}:Days, {td.seconds//3600}:Hours And {(td.seconds//60)%60}:Minutes"
+    return f"  {td.days}:Day/s, {td.seconds//3600}:Hour/s And {(td.seconds//60)%60}:Minute/s"
 
 def menu(update: Update, context: CallbackContext):
     # and automate msg send when the timer complete
@@ -258,13 +258,13 @@ def menu(update: Update, context: CallbackContext):
     if timeDiff.days<0:
         # timer ends
         # for the first time menu should be send automatically
-        msg.reply_text(text="Timer is done here are the products menu")
+        msg.reply_text(text="Here are our products menu")
     else:
         count_down_value = count_down(timeDiff)
         msg.reply_text(text=f"""
-        <strong>The menu will be avaialble on Sunday Apr 30</strong>
+        The menu will be avaialble <strong>on Tuesday May 02</strong>
 
-        After <code>{count_down_value}</code>
+        (In <code>{count_down_value}</code>)
         """, parse_mode=telegram.ParseMode.HTML)
 
 def contacts(update: Update, context: CallbackContext):
@@ -284,12 +284,22 @@ def add_menu(update: Update, context: CallbackContext):
     update.message.reply_text(text="Initiated...")
 
 def show_menu(update: Update, context: CallbackContext):
+    # before time for me/admins
     effective_user = update.effective_user
     if effective_user.id not in ADMIN_IDs:
         update.message.reply_text(text='You are not alloweded to use this command')
         return
     menus = menu_db.fetch().items
-    update.message.reply_text("Menus: "+str(menus))
+    
+    menuTxtAdd = ""
+    count=1
+    for menu in menus:
+        # menutxt="""
+        # {menu["item_name"]}
+        # """
+        menuTxtAdd+="\n"+count+". \n"+"\tName: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +"\n"+"\tBig Cup: "+str(menu["small_cup_price"])+"\n"
+        count+=1
+    update.message.reply_text("Menus: "+menuTxtAdd)
 
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
