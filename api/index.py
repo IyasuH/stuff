@@ -301,7 +301,7 @@ def show_menu(update: Update, context: CallbackContext):
         count+=1
     update.message.reply_text("Menus: "+menuTxtAdd)
     for menu in menus:
-        update.messge.reply_text(menu["item_name"]+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
+        update.message.reply_text(menu["item_name"]+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
 
 def register_handlers(dispatcher):
     # start_handler = CommandHandler('start', start)
