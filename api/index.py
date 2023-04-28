@@ -36,7 +36,7 @@ we will let you know when their is another discounts
 DISCOUNT_GRANTED_MSG = """
 <code>Congratulation!! </code> {name}
 
-Now you can get a discount using your discount number {discount_num}
+Now you can get a discount using your discount number <a href="tg://user?id={user_id}">{discount_num}</a>
 
 When you apply this discount number on 
 
@@ -55,6 +55,8 @@ Welcome to <code>Coffee Go!</code>
 To get discount on our services send /CoffeeGo
 
 To get the products menu /menu
+
+To contact us /contacts
 """
 
 CONTACT_MSG = """
@@ -73,6 +75,7 @@ deta = Deta(DETA_KEY)
 
 customer_db = deta.Base("Customer_DB")
 menu_db = deta.Base("Menu_DB")
+susers_db = deta.Base("Susers_DB")
 
 # here i avoided the 9Am thing and just make it when it will be APR 30
 # Sunday Apr 30 I think the server time behinde 3hrs
@@ -96,6 +99,14 @@ class TelegramWebhook(BaseModel):
 def start(update: Update, context: CallbackContext):
     user = update.effective_user or update.effective_chat
 
+    # 
+    startUser_dict = user.to_dict()
+    todayNow = datetime.datetime.now()
+    startUser_dict["start_at"]=todayNow.strftime("%d/%m/%y, %H:%M")
+    startUser_dict['key'] = str(user.id)
+    # 
+
+    susers_db.put(startUser_dict)
     first_name = getattr(user, "first_name", '')
     update.message.reply_html(text=FIRST_MSG.format(name=first_name, user_id=user.id))
 
@@ -104,7 +115,7 @@ def discount(update: Update, context: CallbackContext):
 
     user_name = getattr(user, "username", '')
     first_name = getattr(user, "first_name", '')
-
+    
     discount_num = str(hash(user_name))[10:]
 
     # before adding new data first lets check if it already exists
@@ -131,7 +142,7 @@ def discount(update: Update, context: CallbackContext):
     customer_query = customer_db.get(str(user.id))
     discount_num = customer_query['discount_num']
     if customer_query['discount_use']=="False":
-        update.message.reply_html(DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num))
+        update.message.reply_html(DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num,user_id=user.id))
     else:
         update.message.reply_html(DISCOUNT_USED.format(name=first_name,discount_num=discount_num))
     # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
@@ -308,6 +319,7 @@ def show_menu(update: Update, context: CallbackContext):
     #     count+=1
     # update.message.reply_text("Menus: "+menuTxtAdd)
     for menu in menus:
+        update.message.reply_photo("./img/Chocolate-Mocha.png")
         update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
 
 def register_handlers(dispatcher):
