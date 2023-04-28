@@ -54,6 +54,8 @@ Welcome to <code>Coffee Go!</code>
 
 To get discount on our services send /CoffeeGo
 
+Only available till Sunday ❗️
+
 To get the products menu /menu
 
 To contact us /contacts
@@ -203,6 +205,23 @@ def menuReleased():
 
     return {"msg": "ok"}
 
+def start_stat(update: Update, context: CallbackContext):
+    # start stat
+    msg = update.message
+    effective_user = update.effective_user
+    if effective_user.id not in ADMIN_IDs:
+        msg.reply_text(text='You are not alloweded to use this command')
+        return
+    # here customers that only send start
+    customers = customer_db.fetch()
+    all_customers = customers.items
+    while customers.last:
+        customers = customer_db.fetch(last=customers.last)
+        all_customers += customers.items    
+    msg.reply_text(text=f"""
+    Total users: {len(all_customers)}
+    """)
+
 def stat(update: Update, context: CallbackContext):
     # to get genral status
     msg = update.message
@@ -239,7 +258,7 @@ def stat(update: Update, context: CallbackContext):
     # customer thoes who doesn't use their discount
     # discount_notUse = customer_db.fetch({"discount_use": "False"}).items
 
-    total=len(discount_use)+len(discount_notUse)
+    # total=len(discount_use)+len(discount_notUse)
     msg.reply_text(text=f"""
     Total users: {len(all_customers)}
     Discount used: {len(discount_use)}
@@ -329,6 +348,7 @@ def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('contacts', contacts))
 
     dispatcher.add_handler(CommandHandler('discounted', status_change))
+    dispatcher.add_handler(CommandHandler('startstat', start_stat))
     dispatcher.add_handler(CommandHandler('stat', stat))
     dispatcher.add_handler(CommandHandler('showMenu', show_menu))
     dispatcher.add_handler(CommandHandler('adddmenus', add_menu))
