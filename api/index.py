@@ -169,7 +169,14 @@ def menuReleased():
     bot = Bot(TOKEN)
     count = 0
 
-    menuMsg = "The menus are " + str(menus)
+    menuMsg = "The menus are: \n"
+    count=1
+    for menu in menus:
+        menuMsg+="\n"+str(count)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +" birr\n"+"\tBig Cup: "+str(menu["big_cup_price"])+" birr\n"
+        count+=1
+    # update.message.reply_text("Menus: "+menuTxtAdd)
+
+
     for customer in all_customers:
         try:
             bot.send_message(
@@ -259,6 +266,10 @@ def menu(update: Update, context: CallbackContext):
         # timer ends
         # for the first time menu should be send automatically
         msg.reply_text(text="Here are our products menu")
+        menus = menu_db.fetch().items
+        for menu in menus:
+            update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
+
     else:
         count_down_value = count_down(timeDiff)
         msg.reply_text(text=f"""
@@ -290,21 +301,16 @@ def show_menu(update: Update, context: CallbackContext):
         update.message.reply_text(text='You are not alloweded to use this command')
         return
     menus = menu_db.fetch().items
-    
-    menuTxtAdd = ""
-    count=1
+    # menuTxtAdd = ""
+    # count=1
+    # for menu in menus:
+    #     menuTxtAdd+="\n"+str(count)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +" birr\n"+"\tBig Cup: "+str(menu["big_cup_price"])+" birr\n"
+    #     count+=1
+    # update.message.reply_text("Menus: "+menuTxtAdd)
     for menu in menus:
-        # menutxt="""
-        # {menu["item_name"]}
-        # """
-        menuTxtAdd+="\n"+str(count)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +" birr\n"+"\tBig Cup: "+str(menu["big_cup_price"])+" birr\n"
-        count+=1
-    update.message.reply_text("Menus: "+menuTxtAdd)
-    for menu in menus:
-        update.message.reply_text(menu["item_name"]+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
+        update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
 
 def register_handlers(dispatcher):
-    # start_handler = CommandHandler('start', start)
     dispatcher.add_handler(CommandHandler('start', start))    
     dispatcher.add_handler(CommandHandler('CoffeeGo', discount))
     dispatcher.add_handler(CommandHandler('menu', menu))
