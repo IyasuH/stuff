@@ -312,19 +312,11 @@ def tot_stat(update: Update, context: CallbackContext):
         return
     
     customers = customer_db.fetch().items
-    count = 0
+    count = 1
     for customer in customers:
-        update.message.reply_html("""
-        {count}
-
-        name: <a href="tg://user?id={cid}>{cname}</a>
-
-        joined_at: {cjat}
-
-        """.format(count=str(count), cid=customer["id"], cname=customer["first_name"], cjat=customer["joined_at"])
-        )
+        update.message.reply_text(str(count)+"\nusername: "+customer["first_name"]+"\njoined_at: "+customer["joined_at"])
         count += 1
-        # update.message.reply_text("username: "+customer["username"]+"\njoined_at: "+customer["joined_at"])
+        
 
 def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('start', start))    
