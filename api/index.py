@@ -123,7 +123,8 @@ def discount(update: Update, context: CallbackContext):
     # before adding new data first lets check if it already exists
     customer_query = customer_db.get(str(user.id))
     if customer_query == None:
-        discount_num = str(hash(user_name))[10:]
+        # some people doesn't have username so better to add their first name
+        discount_num = str(hash(user_name+first_name))[10:]
         # save every thing about user
         user_dict = user.to_dict()
         user_dict['discount_num'] = discount_num
@@ -147,24 +148,6 @@ def discount(update: Update, context: CallbackContext):
         update.message.reply_html(DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num,user_id=user.id))
     else:
         update.message.reply_html(DISCOUNT_USED.format(name=first_name,discount_num=discount_num))
-    # context.bot.send_message(chat_id=update.effective_chat.id, text="Hello {} Now you will have a discounts!".format(update.message.username))
-    # using corns
-    # here to send menu due Sunday Apr 30
-    # timeDiff = relaseDateTime - datetime.datetime.now()
-    # # total due seconds
-    # due = timeDiff.days*24*3600+timeDiff.seconds
-    # if due<0:
-    #     return
-
-    # # query all users(who doesn't use their discount) and send them the scheduled msg
-    # customers = customer_db.fetch({"discount_use": "False"}).items
-    # for customer in customers:
-    #     chat_id = customer['chat_id']
-    #     updater.job_queue.run_once(menuReleased, due, chat_id=chat_id, name=str(chat_id), data=due)
-    #     # try:
-    #     #     context.job_queue.run_once(menuReleased, due, chat_id=customer['chat_id'], name=str(customer['chat_id']), data=due)
-    #     # except:
-    #     #     pass
 
 # cron job
 @app.get('/api/cron')
@@ -188,8 +171,7 @@ def menuReleased():
         menuMsg+="\n"+str(count)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +" birr\n"+"\tBig Cup: "+str(menu["big_cup_price"])+" birr\n"
         count+=1
     # update.message.reply_text("Menus: "+menuTxtAdd)
-
-
+    # to avoid sending too many msgs at once only sending all menus at once here
     for customer in all_customers:
         try:
             bot.send_message(
@@ -230,13 +212,6 @@ def stat(update: Update, context: CallbackContext):
         msg.reply_text(text='You are not alloweded to use this command')
         return
     
-    # MAKE THIS IN WRAPER
-    # msg.reply_text(text="Sending users...")
-    # user = update.effective_chat or update.effective_user or update.message.from_user
-    # msg=context.bot.send_message(
-    #     chat_id=user.id,
-    #     text="Please wait..."
-    # )
     customers = customer_db.fetch()
     all_customers = customers.items
     while customers.last:
@@ -252,13 +227,6 @@ def stat(update: Update, context: CallbackContext):
         else:
             discount_use.append(customer)
 
-    # since customers number not expected to be greater than 1000 normal fetch function works fine I think
-    # customer thoes who uses discounts
-    # discount_use = customer_db.fetch({"discount_use": "True"}).items
-    # customer thoes who doesn't use their discount
-    # discount_notUse = customer_db.fetch({"discount_use": "False"}).items
-
-    # total=len(discount_use)+len(discount_notUse)
     msg.reply_text(text=f"""
     Total users: {len(all_customers)}
     Discount used: {len(discount_use)}
@@ -331,15 +299,32 @@ def show_menu(update: Update, context: CallbackContext):
         update.message.reply_text(text='You are not alloweded to use this command')
         return
     menus = menu_db.fetch().items
-    # menuTxtAdd = ""
-    # count=1
-    # for menu in menus:
-    #     menuTxtAdd+="\n"+str(count)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +" birr\n"+"\tBig Cup: "+str(menu["big_cup_price"])+" birr\n"
-    #     count+=1
-    # update.message.reply_text("Menus: "+menuTxtAdd)
     for menu in menus:
-        update.message.reply_photo("./img/Chocolate-Mocha.png")
+        # this causing error 
+        # update.message.reply_photo("./img/Chocolate-Mocha.png")
         update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
+
+def tot_stat(update: Update, context: CallbackContext):
+    
+    effective_user = update.effective_user
+    if effective_user.id not in ADMIN_IDs:
+        update.message.reply_text(text="You are not alloweded to use this command")
+        return
+    
+    customers = customer_db.fetch().items
+    count = 0
+    for customer in customers:
+        update.message.reply_text(f"""
+        {str(count)}
+
+        username: {customer["username"]}
+
+        joined_at: <a href="tg://user?id={customer["id"]}>{customer["joined_at"]}</a>
+
+        """
+        )
+        count += 1
+        # update.message.reply_text("username: "+customer["username"]+"\njoined_at: "+customer["joined_at"])
 
 def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('start', start))    
@@ -352,6 +337,7 @@ def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('stat', stat))
     dispatcher.add_handler(CommandHandler('showMenu', show_menu))
     dispatcher.add_handler(CommandHandler('adddmenus', add_menu))
+    dispatcher.add_handler(CommandHandler('totstat', tot_stat))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
