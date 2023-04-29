@@ -305,7 +305,7 @@ def show_menu(update: Update, context: CallbackContext):
         update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
 
 def tot_stat(update: Update, context: CallbackContext):
-    
+
     effective_user = update.effective_user
     if effective_user.id not in ADMIN_IDs:
         update.message.reply_text(text="You are not alloweded to use this command")
@@ -314,12 +314,12 @@ def tot_stat(update: Update, context: CallbackContext):
     customers = customer_db.fetch().items
     count = 0
     for customer in customers:
-        update.message.reply_text(f"""
+        update.message.reply_html(f"""
         {str(count)}
 
-        username: {customer["username"]}
+        name: <a href="tg://user?id={customer["id"]}>{customer["first_name"]}</a>
 
-        joined_at: <a href="tg://user?id={customer["id"]}>{customer["joined_at"]}</a>
+        joined_at: {customer["joined_at"]}
 
         """
         )
