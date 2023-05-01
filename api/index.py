@@ -276,6 +276,7 @@ def menu(update: Update, context: CallbackContext):
         menus = menu_db.fetch().items
         for menu in menus:
             update.message.reply_html("<strong>"+menu["item_name"]+"</strong>"+"\nPrice: "+str(menu["small_cup_price"])+" birr")
+        msg.reply_text(text="You can get them @Messi on Wednsday and enjoy you discounts")
 
     else:
         count_down_value = count_down(timeDiff)
