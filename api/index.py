@@ -47,6 +47,15 @@ When you apply this discount number on
     Friday May 5th you get 10% off
 """
 
+DISCOUNT_GRANTED_MSG_AFTR_EXPR = """
+You can come on these days and enjoy your discount with discount number <a href="tg://user?id={user_id}">{discount_num}</a>
+
+    Wednsday May 3rd you get 50% off
+
+    Thursday May 4th you get 25% off
+
+    Friday May 5th you get 10% off
+"""
 
 FIRST_MSG = """Hello 👋 <a href="tg://user?id={user_id}">{name}</a>
 
@@ -115,37 +124,59 @@ def discount(update: Update, context: CallbackContext):
 
     user_name = getattr(user, "username", '')
     first_name = getattr(user, "first_name", '')
-    
-    discount_num = str(hash(user_name))[10:]
 
-    # before adding new data first lets check if it already exists
+    ######################FOR NORMAL SEASONS###############################
     customer_query = customer_db.get(str(user.id))
     if customer_query == None:
-        # some people doesn't have username so better to add their first name
-        discount_num = str(hash(user_name+first_name))[10:]
-        # save every thing about user
-        user_dict = user.to_dict()
-        user_dict['discount_num'] = discount_num
-        # discount_use(if user used his/her discount or not) and default value is False
-        user_dict['discount_use'] = 'False'
-        todayNow = datetime.datetime.now()
-        user_dict['joined_at'] = todayNow.strftime("%d/%m/%y, %H:%M")
+        update.message.reply_html("Currently, the discount period has ended and we will notify you when another discount season becomes available. In the meantime, please enjoy our products.")
+        return
 
-        # also save chat_id for schedule msgs
-        # use id as key
-        user_dict['key'] = str(user.id)
-
-        # save to db
-        # using put since insert uses more time
-        customer_db.put(user_dict)
-        # sleep time
-        time.sleep(.5)
-    customer_query = customer_db.get(str(user.id))
     discount_num = customer_query['discount_num']
     if customer_query['discount_use']=="False":
-        update.message.reply_html(DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num,user_id=user.id))
+        update.message.reply_html(DISCOUNT_GRANTED_MSG_AFTR_EXPR.format(discount_num=discount_num,user_id=user.id))
     else:
         update.message.reply_html(DISCOUNT_USED.format(name=first_name,discount_num=discount_num))
+
+    #######################################################################
+
+
+    ########################FOR DISCOUNT SEASONS###########################
+
+    # user_name = getattr(user, "username", '')
+    # first_name = getattr(user, "first_name", '')
+
+    # discount_num = str(hash(user_name))[10:]
+
+    # # before adding new data first lets check if it already exists
+    # customer_query = customer_db.get(str(user.id))
+    # if customer_query == None:
+    #     # some people doesn't have username so better to add their first name
+    #     discount_num = str(hash(user_name+first_name))[10:]
+    #     # save every thing about user
+    #     user_dict = user.to_dict()
+    #     user_dict['discount_num'] = discount_num
+    #     # discount_use(if user used his/her discount or not) and default value is False
+    #     user_dict['discount_use'] = 'False'
+    #     todayNow = datetime.datetime.now()
+    #     user_dict['joined_at'] = todayNow.strftime("%d/%m/%y, %H:%M")
+
+    #     # also save chat_id for schedule msgs
+    #     # use id as key
+    #     user_dict['key'] = str(user.id)
+
+    #     # save to db
+    #     # using put since insert uses more time
+    #     customer_db.put(user_dict)
+    #     # sleep time
+    #     time.sleep(.5)
+    # customer_query = customer_db.get(str(user.id))
+    # discount_num = customer_query['discount_num']
+    # if customer_query['discount_use']=="False":
+    #     update.message.reply_html(DISCOUNT_GRANTED_MSG.format(name=first_name,discount_num=discount_num,user_id=user.id))
+    # else:
+    #     update.message.reply_html(DISCOUNT_USED.format(name=first_name,discount_num=discount_num))
+
+    #######################################################################
 
 # cron job
 @app.get('/api/cron')
