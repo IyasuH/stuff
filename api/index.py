@@ -79,7 +79,7 @@ susers_db = deta.Base("Susers_DB")
 
 # here i avoided the 9Am thing and just make it when it will be APR 30
 # Sunday Apr 30 I think the server time behinde 3hrs
-relaseDateTime = datetime.datetime(2023, 5, 2, 21)
+relaseDateTime = datetime.datetime(2023, 5, 1, 22, 10)
 
 
 class TelegramWebhook(BaseModel):
@@ -158,16 +158,20 @@ def menuReleased():
         all_customers += customers.items
 
     # just hope menu items will not be geater than 1000
-    menus = menu_db.fetch().items
+    # menus = menu_db.fetch().items
 
     bot = Bot(TOKEN)
     count = 0
 
-    menuMsg = "The menus are: \n"
-    counnt=1
-    for menu in menus:
-        menuMsg+="\n"+str(counnt)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tPrice: "+str(menu["small_cup_price"]) +" birr\n"
-        counnt+=1
+    menuMsg = """
+    /menu to see our products menu in detail
+    """
+    
+
+    # counnt=1
+    # for menu in menus:
+    #     menuMsg+="\n"+str(counnt)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tPrice: "+str(menu["small_cup_price"]) +" birr\n"
+    #     counnt+=1
     # update.message.reply_text("Menus: "+menuTxtAdd)
     # to avoid sending too many msgs at once only sending all menus at once here
     for customer in all_customers:
@@ -263,14 +267,15 @@ def menu(update: Update, context: CallbackContext):
     # time difference
     effective_user = update.effective_user
     timeDiff = relaseDateTime - datetime.datetime.now()
-    if timeDiff.days<0 or effective_user.id in ADMIN_IDs:
+    # if timeDiff.days<0 or effective_user.id in ADMIN_IDs:
+    if timeDiff.days<0:
         # timer ends
         # for the first time menu should be send automatically
         msg.reply_text(text="Here are our products menu")
         msg.reply_photo("https://i.imgur.com/rmm4gov.jpeg")
         menus = menu_db.fetch().items
         for menu in menus:
-            update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nPrice: "+str(menu["small_cup_price"])+" birr")
+            update.message.reply_html("<strong>"+menu["item_name"]+"</strong>"+"\nPrice: "+str(menu["small_cup_price"])+" birr")
 
     else:
         count_down_value = count_down(timeDiff)
