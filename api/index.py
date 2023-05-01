@@ -164,14 +164,18 @@ def menuReleased():
     count = 0
 
     menuMsg = "The menus are: \n"
-    count=1
+    counnt=1
     for menu in menus:
-        menuMsg+="\n"+str(count)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tSmall Cup: "+str(menu["small_cup_price"]) +" birr\n"+"\tBig Cup: "+str(menu["big_cup_price"])+" birr\n"
-        count+=1
+        menuMsg+="\n"+str(counnt)+". \n"+"\tItem: "+menu["item_name"] +"\n"+ "\tPrice: "+str(menu["small_cup_price"]) +" birr\n"
+        counnt+=1
     # update.message.reply_text("Menus: "+menuTxtAdd)
     # to avoid sending too many msgs at once only sending all menus at once here
     for customer in all_customers:
         try:
+            bot.send_photo(
+                int(customer['key']),
+                "https://i.imgur.com/rmm4gov.jpeg"
+            )
             bot.send_message(
                 chat_id=int(customer['key']),
                 text = menuMsg
@@ -257,14 +261,16 @@ def menu(update: Update, context: CallbackContext):
     # and automate msg send when the timer complete
     msg = update.message
     # time difference
+    effective_user = update.effective_user
     timeDiff = relaseDateTime - datetime.datetime.now()
-    if timeDiff.days<0:
+    if timeDiff.days<0 or effective_user.id in ADMIN_IDs:
         # timer ends
         # for the first time menu should be send automatically
         msg.reply_text(text="Here are our products menu")
+        msg.reply_photo("https://i.imgur.com/rmm4gov.jpeg")
         menus = menu_db.fetch().items
         for menu in menus:
-            update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
+            update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nPrice: "+str(menu["small_cup_price"])+" birr")
 
     else:
         count_down_value = count_down(timeDiff)
@@ -297,10 +303,10 @@ def show_menu(update: Update, context: CallbackContext):
         update.message.reply_text(text='You are not alloweded to use this command')
         return
     menus = menu_db.fetch().items
+    update.message.reply_photo("https://i.imgur.com/rmm4gov.jpeg")
     for menu in menus:
         # this causing error 
-        update.message.reply_photo("https://i.imgur.com/mZAnJvT.jpeg")
-        update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
+        update.message.reply_html("<strong>"+menu["item_name"]+"</strong>"+"\nPrice: "+str(menu["small_cup_price"])+" birr")
 
 def tot_stat(update: Update, context: CallbackContext):
 
