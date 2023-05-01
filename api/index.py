@@ -299,7 +299,7 @@ def show_menu(update: Update, context: CallbackContext):
     menus = menu_db.fetch().items
     for menu in menus:
         # this causing error 
-        # update.message.reply_photo("./img/Chocolate-Mocha.png")
+        update.message.reply_photo("https://i.imgur.com/mZAnJvT.jpeg")
         update.message.reply_text("<strong>"+menu["item_name"]+"</strong>"+"\nSmall Cup: "+str(menu["small_cup_price"])+" birr\nBig Cup: "+str(menu["big_cup_price"])+" birr")
 
 def tot_stat(update: Update, context: CallbackContext):
