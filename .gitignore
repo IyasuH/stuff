@@ -2,3 +2,6 @@ env
 .env
 .space
 test.py
+dump.json
+backup.py
+*.swp
