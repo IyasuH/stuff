@@ -269,7 +269,7 @@ def menu(update: Update, context: CallbackContext):
     else:
         count_down_value = count_down(timeDiff)
         msg.reply_text(text=f"""
-        The menu will be avaialble <strong>on Tuesday May 02</strong>
+        The menu will be avaialble <strong>on Wednsday May 03</strong>
 
         (In <code>{count_down_value}</code>)
         """, parse_mode=telegram.ParseMode.HTML)
