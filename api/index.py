@@ -385,7 +385,7 @@ def show_comments(update: Update, context: CallbackContext):
         return
     comments = comments_db.fetch().items
     for comment in comments:
-        update.message.reply_text("The comment: "+" ".join(comment["comment"])+"\n User first name: "+comment["firstName"]+"\nAt: "+comment["dateTime"])
+        update.message.reply_text("The comment: "+comment["comment"]+"\n User first name: "+comment["firstName"]+"\nAt: "+comment["dateTime"])
 
 
 def register_handlers(dispatcher):
