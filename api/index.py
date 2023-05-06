@@ -59,22 +59,21 @@ You can come on these days and enjoy your discount with discount number <a href=
 
 FIRST_MSG = """Hello 👋 <a href="tg://user?id={user_id}">{name}</a>
 
-Welcome to <code>Coffee Go!</code>
+<strong>Welcome to <code>Coffee Go!</code> Bot!</strong>
 
-To get discount on our services send /CoffeeGo
+Use /menu to see the products menu.
 
-To get the products menu /menu
+Use /comment followed by your comments about our products or services.
 
-To contact us /contacts
+Use /contacts to contact us.
 """
 
 CONTACT_MSG = """
 You can contact as using
 
+@Dagalex or
+
 @IyasuHa
-
-@Dagalex
-
 """
 
 
@@ -85,6 +84,7 @@ deta = Deta(DETA_KEY)
 customer_db = deta.Base("Customer_DB")
 menu_db = deta.Base("Menu_DB")
 susers_db = deta.Base("Susers_DB")
+comments_db = deta.Base("Comments_DB")
 
 # here i avoided the 9Am thing and just make it when it will be APR 30
 # Sunday Apr 30 I think the server time behinde 3hrs
@@ -126,16 +126,18 @@ def discount(update: Update, context: CallbackContext):
     first_name = getattr(user, "first_name", '')
 
     ######################FOR NORMAL SEASONS###############################
-    customer_query = customer_db.get(str(user.id))
-    if customer_query == None:
-        update.message.reply_html("Currently, the discount period has ended and we will notify you when another discount season becomes available. In the meantime, please enjoy our products.")
-        return
+    update.message.reply_html("Currently, the discount period has ended and we will notify you when another discount season becomes available. In the meantime, please enjoy our products.")
 
-    discount_num = customer_query['discount_num']
-    if customer_query['discount_use']=="False":
-        update.message.reply_html(DISCOUNT_GRANTED_MSG_AFTR_EXPR.format(discount_num=discount_num,user_id=user.id))
-    else:
-        update.message.reply_html(DISCOUNT_USED.format(name=first_name,discount_num=discount_num))
+    # customer_query = customer_db.get(str(user.id))
+    # if customer_query == None:
+    #     update.message.reply_html("Currently, the discount period has ended and we will notify you when another discount season becomes available. In the meantime, please enjoy our products.")
+    #     return
+
+    # discount_num = customer_query['discount_num']
+    # if customer_query['discount_use']=="False":
+    #     update.message.reply_html(DISCOUNT_GRANTED_MSG_AFTR_EXPR.format(discount_num=discount_num,user_id=user.id))
+    # else:
+    #     update.message.reply_html(DISCOUNT_USED.format(name=first_name,discount_num=discount_num))
 
     #######################################################################
 
@@ -307,7 +309,7 @@ def menu(update: Update, context: CallbackContext):
         menus = menu_db.fetch().items
         for menu in menus:
             update.message.reply_html("<strong>"+menu["item_name"]+"</strong>"+"\nPrice: "+str(menu["small_cup_price"])+" birr")
-        msg.reply_html(text="You can get them at <code>Messi Caffe</code> on <code>Wednsday</code> and enjoy 😎 🥂 ")
+        msg.reply_html(text="You can get them at <code>Messi Cafe</code>enjoy")
 
     else:
         count_down_value = count_down(timeDiff)
@@ -358,12 +360,40 @@ def tot_stat(update: Update, context: CallbackContext):
         update.message.reply_text(str(count)+"\nusername: "+customer["first_name"]+"\njoined_at: "+customer["joined_at"])
         count += 1
         
+def comments(update: Update, context: CallbackContext):
+    # to collect comments from users
+    user = update.effective_user or update.effective_chat
+    comment = str(context.args[0])
+    customerUserName = getattr(user, "username", '')
+    customerFirstName = getattr(user, "first_name", '')
+    commentAt = datetime.datetime.now()
+    comment_dict = {}
+    comment_dict["comment"] = comment
+    comment_dict["userName"] = customerUserName
+    comment_dict["firstName"] = customerFirstName
+    comment_dict["dateTime"] = commentAt.strftime("%d/%m/%y, %H:%M")
+
+    # save to db
+    comments_db.put(comment_dict)
+    update.message.reply_html("<strong>Thanks for the comment</strong>")
+
+def show_comments(update: Update, context: CallbackContext):
+    # to see comments
+    effective_user = update.effective_user
+    if effective_user.id not in ADMIN_IDs:
+        update.message.reply_text(text='You are not alloweded to use this command')
+        return
+    comments = comments_db.fetch().items
+    for comment in comments:
+        update.message.reply_text("The comment: "+comment["comment"]+"\n User first name: "+comment["firstName"]+"\nAt: "+comment["dateTime"])
+
 
 def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('start', start))    
     dispatcher.add_handler(CommandHandler('CoffeeGo', discount))
     dispatcher.add_handler(CommandHandler('menu', menu))
     dispatcher.add_handler(CommandHandler('contacts', contacts))
+    dispatcher.add_handler(CommandHandler('comment', comments))
 
     dispatcher.add_handler(CommandHandler('discounted', status_change))
     dispatcher.add_handler(CommandHandler('startstat', start_stat))
@@ -371,6 +401,7 @@ def register_handlers(dispatcher):
     dispatcher.add_handler(CommandHandler('showMenu', show_menu))
     dispatcher.add_handler(CommandHandler('adddmenus', add_menu))
     dispatcher.add_handler(CommandHandler('totstat', tot_stat))
+    dispatcher.add_handler(CommandHandler('showComm', show_comments))
 
 def main():
     updater = Updater(TOKEN, use_context=True)
