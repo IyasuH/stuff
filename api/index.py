@@ -363,7 +363,7 @@ def tot_stat(update: Update, context: CallbackContext):
 def comments(update: Update, context: CallbackContext):
     # to collect comments from users
     user = update.effective_user or update.effective_chat
-    comment = str(context.args[0])
+    comment = str(context.args[0:])
     customerUserName = getattr(user, "username", '')
     customerFirstName = getattr(user, "first_name", '')
     commentAt = datetime.datetime.now()
