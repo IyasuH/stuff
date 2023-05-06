@@ -363,8 +363,7 @@ def tot_stat(update: Update, context: CallbackContext):
 def comments(update: Update, context: CallbackContext):
     # to collect comments from users
     user = update.effective_user or update.effective_chat
-    commentArr = str(context.args[0:])
-    comment = " ".join(commentArr)
+    comment = str(context.args[0:])
     customerUserName = getattr(user, "username", '')
     customerFirstName = getattr(user, "first_name", '')
     commentAt = datetime.datetime.now()
@@ -386,7 +385,7 @@ def show_comments(update: Update, context: CallbackContext):
         return
     comments = comments_db.fetch().items
     for comment in comments:
-        update.message.reply_text("The comment: "+comment["comment"]+"\n User first name: "+comment["firstName"]+"\nAt: "+comment["dateTime"])
+        update.message.reply_text("The comment: "+" ".join(comment["comment"])+"\n User first name: "+comment["firstName"]+"\nAt: "+comment["dateTime"])
 
 
 def register_handlers(dispatcher):
