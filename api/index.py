@@ -368,7 +368,7 @@ def comments(update: Update, context: CallbackContext):
     customerFirstName = getattr(user, "first_name", '')
     commentAt = datetime.datetime.now()
     comment_dict = {}
-    comment_dict["comment"] = comment
+    comment_dict["comment"] = comment[1:-1].replace("'", "").replace(",", "")
     comment_dict["userName"] = customerUserName
     comment_dict["firstName"] = customerFirstName
     comment_dict["dateTime"] = commentAt.strftime("%d/%m/%y, %H:%M")
@@ -383,8 +383,14 @@ def show_comments(update: Update, context: CallbackContext):
     if effective_user.id not in ADMIN_IDs:
         update.message.reply_text(text='You are not alloweded to use this command')
         return
-    comments = comments_db.fetch().items
-    for comment in comments:
+    res = comments_db.fetch()
+    all_comments = res.items
+    while res.last:
+        res = comments_db.fetch(last=res.last)
+        all_comments += res.items
+    # comments = comments_db.fetch().items
+
+    for comment in all_comments:
         update.message.reply_text("The comment: "+comment["comment"]+"\n User first name: "+comment["firstName"]+"\nAt: "+comment["dateTime"])
 
 
